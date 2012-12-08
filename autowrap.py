@@ -15,7 +15,7 @@ class AutoWrapListener(sublime_plugin.EventListener):
         if view.is_scratch() or view.settings().get('is_widget'): return
         if not view.settings().get('auto_wrap', False): return
         rulers = view.settings().get('rulers')
-        if not rulers: rulers = [100]
+        if not rulers: rulers = [80]
         sel = view.sel()
         if len(sel)>1 or sel[0].begin()!=sel[0].end(): return
         pt = sel[0].end()
@@ -34,6 +34,8 @@ class AutoWrapListener(sublime_plugin.EventListener):
         # insert enter
         edit_insert = view.begin_edit()
         view.insert(edit_insert, insertpt, "\n")
+        if view.settings().get('auto_indent'):
+            view.run_command('reindent', {'force_indent': False})
         view.end_edit(edit_insert)
 
 class ToggleAutoWrap(sublime_plugin.WindowCommand):
