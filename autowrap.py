@@ -6,15 +6,14 @@ class AutoWrapListener(sublime_plugin.EventListener):
     def on_load(self, view):
         pass
 
-
     def on_selection_modified(self, view):
         if view.is_scratch() or view.settings().get('is_widget'): return
-        if not view.settings().get('auto_wrap'): return
+        if not view.settings().get('auto_wrap', False): return
         self.prev_sel = view.sel()[0].end()
 
     def on_modified(self, view):
         if view.is_scratch() or view.settings().get('is_widget'): return
-        if not view.settings().get('auto_wrap'): return
+        if not view.settings().get('auto_wrap', False): return
         rulers = view.settings().get('rulers')
         if not rulers: rulers = [100]
         sel = view.sel()
@@ -36,3 +35,13 @@ class AutoWrapListener(sublime_plugin.EventListener):
         edit_insert = view.begin_edit()
         view.insert(edit_insert, insertpt, "\n")
         view.end_edit(edit_insert)
+
+class ToggleAutoWrap(sublime_plugin.WindowCommand):
+    def run(self):
+        view = self.window.active_view()
+        view.settings().set("auto_wrap", not view.settings().get("auto_wrap", False))
+        if view.settings().get("auto_wrap"):
+            onoff = "on"
+        else:
+            onoff = "off"
+        sublime.status_message("Auto (Hard) Wrap %s" % onoff)

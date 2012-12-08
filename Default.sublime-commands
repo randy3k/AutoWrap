@@ -1,0 +1,6 @@
+[
+    {
+        "caption": "Toggle Auto (Hard) Wrap",
+        "command": "toggle_auto_wrap"
+    }
+]
