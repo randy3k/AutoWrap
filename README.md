@@ -9,8 +9,15 @@ Installation
  2) Put the package under `Packages` folder
 
 
+
 Usage
 ------------
+###To toggle Auto Wrap
+Type `Auto Wrap` in command palette.
+
+
+###To activate Auto Wrap for a specific syntax at start up
+
 Put the following in your syntax specific preference.<br>
 Menu -> Preference -> Settings - More -> Syntax Specific - User
 
