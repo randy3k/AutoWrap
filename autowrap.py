@@ -36,8 +36,5 @@ class ToggleAutoWrap(sublime_plugin.WindowCommand):
     def run(self):
         view = self.window.active_view()
         view.settings().set("auto_wrap", not view.settings().get("auto_wrap", False))
-        if view.settings().get("auto_wrap"):
-            onoff = "on"
-        else:
-            onoff = "off"
+        onoff = "on" if view.settings().get("auto_wrap") else "off"
         sublime.status_message("Auto (Hard) Wrap %s" % onoff)
