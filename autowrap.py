@@ -7,7 +7,7 @@ class AutoWrapListener(sublime_plugin.EventListener):
         if view.is_scratch() or view.settings().get('is_widget'): return
         if not view.settings().get('auto_wrap', False): return
         sel = view.sel()
-        if len(sel)>1 or sel[0].begin()!=sel[0].end(): return
+        if not sel or len(sel)>1 or sel[0].begin()!=sel[0].end(): return
         rulers = view.settings().get('rulers')
         if not rulers: rulers = [80]
         pt = sel[0].end()
