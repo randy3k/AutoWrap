@@ -1,12 +1,11 @@
 Auto (Hard) Wrap for Sublime Text 2
 ====================
 Automatic hard wrap when the cursor is beyond the ruler (default 80).
+It is very useful for text documents.
 
 Installation
 ------------
- 1) (not available now) Via [Package Control](http://wbond.net/sublime_packages/package_control)
-
- 2) Put the package under `Packages` folder
+[Package Control](http://wbond.net/sublime_packages/package_control)
 
 
 
