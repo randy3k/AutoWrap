@@ -1,4 +1,4 @@
-import sublime, sublime_plugin
+import sublime, sublime_plugin, re
 
 class AutoWrapListener(sublime_plugin.EventListener):
     saved_sel = 0
@@ -12,18 +12,18 @@ class AutoWrapListener(sublime_plugin.EventListener):
         if not rulers: rulers = [80]
         pt = sel[0].end()
         if pt<=self.saved_sel or pt-self.saved_sel>1 or view.rowcol(pt)[1]<=rulers[0] \
-            or view.substr(pt-1)==" " or view.line(pt).end() != pt:
+            or view.substr(pt-1)==" ":
             activate = False
         else: activate = True
         self.saved_sel = sel[0].end()
         if not activate: return
 
         # to obtain the insert point
-        view.run_command("move", {"by": "stops", "word_begin": True, "empty_line": True, "separators": "", "forward": False})
-        insertpt = view.sel()[0].end()
-        view.sel().clear()
-        view.show(self.saved_sel)
-        view.sel().add(self.saved_sel)
+        line = view.substr(view.line(pt))
+        m = re.match('.*\s(\S*)$',line)
+        if not m: return
+        insertpt = view.line(pt).end()-len(m.group(1))
+        if insertpt<=rulers[0] or pt<insertpt: return
 
         # insert enter
         edit_insert = view.begin_edit()
