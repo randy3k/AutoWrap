@@ -20,10 +20,10 @@ class AutoWrapListener(sublime_plugin.EventListener):
 
         # to obtain the insert point
         line = view.substr(view.line(pt))
-        m = re.match('.*\s(\S*)$',line)
+        m = re.match('.*\s(\S*\s*)$',line)
         if not m: return
         insertpt = view.line(pt).end()-len(m.group(1))
-        if insertpt<=rulers[0] or pt<insertpt: return
+        if view.rowcol(insertpt)[1]<=rulers[0] or pt<insertpt: return
 
         # insert enter
         edit_insert = view.begin_edit()
