@@ -25,8 +25,8 @@ Menu -> Preference -> Settings - More -> Syntax Specific - User
     }
 
 ###Wraping style
-Long word will stay at the ruler and only the next word breaks into a new line.
- To change this behavior, put this in your syntax specific preference.
+Long word will stay at the ruler and only the next word breaks into a new line.<br>
+To change this behavior, put this in your preference or syntax specific preference.
 
     {
         "wrap_style" : "classic"
