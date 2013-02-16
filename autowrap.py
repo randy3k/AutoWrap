@@ -23,7 +23,9 @@ class AutoWrapListener(sublime_plugin.EventListener):
         m = re.match('.*\s(\S*\s*)$',line)
         if not m: return
         insertpt = view.line(pt).end()-len(m.group(1))
-        if view.rowcol(insertpt)[1]<=rulers[0] or pt<insertpt: return
+        if pt<insertpt: return
+        if view.settings().get("wrap_style") != "classic" and view.rowcol(insertpt)[1]<=rulers[0]:
+            return
 
         # insert enter
         edit_insert = view.begin_edit()

@@ -23,3 +23,11 @@ Menu -> Preference -> Settings - More -> Syntax Specific - User
     {
         "auto_wrap" : true
     }
+
+###Wraping style
+Long word will stay at the ruler and only the next word breaks into a new line.
+ To change this behavior, put this in your syntax specific preference.
+
+    {
+        "wrap_style" : "classic"
+    }
