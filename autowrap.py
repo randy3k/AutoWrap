@@ -1,4 +1,6 @@
-import sublime, sublime_plugin, re
+import sublime, sublime_plugin, re, sys
+if sys.version >= '3':
+    long  = int
 
 class AutoWrapListener(sublime_plugin.EventListener):
     saved_sel = 0
@@ -28,11 +30,13 @@ class AutoWrapListener(sublime_plugin.EventListener):
             return
 
         # insert enter
-        edit_insert = view.begin_edit()
-        view.insert(edit_insert, insertpt, "\n")
+        view.run_command('auto_wrap_insert', {'insertpt': insertpt})
         if view.settings().get('auto_indent'):
             view.run_command('reindent', {'force_indent': False})
-        view.end_edit(edit_insert)
+
+class AutoWrapInsertCommand(sublime_plugin.TextCommand):
+    def run(self, edit, insertpt):
+        self.view.insert(edit, long(insertpt), "\n")
 
 class ToggleAutoWrap(sublime_plugin.WindowCommand):
     def run(self):
