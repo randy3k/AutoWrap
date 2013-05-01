@@ -17,6 +17,7 @@ class AutoWrapListener(sublime_plugin.EventListener):
                 wrap_width = rulers[0]
             else:
                 wrap_width = 80
+        wrap_width -= 2
         pt = sel[0].end()
         if pt<=self.saved_sel or pt-self.saved_sel>1 or view.rowcol(pt)[1]<=wrap_width \
             or view.substr(pt-1)==" ":
