@@ -1,7 +1,7 @@
 Auto (Hard) Wrap for Sublime Text 2/3
 ====================
-Automatic hard wrap when the cursor is beyond the ruler (default 80).
-It is very useful for text documents.
+Automatic hard wrap when the cursor is beyond `wrap_width` (if set) or the ruler
+(default 80).  It is very useful for text documents.
 
 Installation
 ------------
