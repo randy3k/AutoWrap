@@ -10,10 +10,16 @@ class AutoWrapListener(sublime_plugin.EventListener):
         if not view.settings().get('auto_wrap', False): return
         sel = view.sel()
         if not sel or len(sel)>1 or sel[0].begin()!=sel[0].end(): return
-        rulers = view.settings().get('rulers')
-        if not rulers: rulers = [80]
+        wrap_width = view.settings().get('wrap_width')
+        if not wrap_width or wrap_width == 0:
+            rulers = view.settings().get('rulers')
+            if rulers:
+                wrap_width = rulers[0]
+            else:
+                wrap_width = 80
+        wrap_width -= 2
         pt = sel[0].end()
-        if pt<=self.saved_sel or pt-self.saved_sel>1 or view.rowcol(pt)[1]<=rulers[0] \
+        if pt<=self.saved_sel or pt-self.saved_sel>1 or view.rowcol(pt)[1]<=wrap_width \
             or view.substr(pt-1)==" ":
             activate = False
         else: activate = True
@@ -26,7 +32,7 @@ class AutoWrapListener(sublime_plugin.EventListener):
         if not m: return
         insertpt = view.line(pt).end()-len(m.group(1))
         if pt<insertpt: return
-        if view.settings().get("wrap_style") != "classic" and view.rowcol(insertpt)[1]<=rulers[0]:
+        if view.settings().get("wrap_style") != "classic" and view.rowcol(insertpt)[1]<=wrap_width:
             return
 
         # insert enter
