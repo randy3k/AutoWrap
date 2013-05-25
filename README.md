@@ -1,7 +1,6 @@
 Auto (Hard) Wrap for Sublime Text 2/3
 ====================
-Automatic hard wrap when the cursor is beyond `wrap_width` (if set) or the ruler
-(default 80).  It is very useful for text documents.
+Automatic hard wrap when the cursor is beyond `wrap_width` (default 80).  It is very useful for text documents.
 
 Installation
 ------------
@@ -23,6 +22,13 @@ Menu -> Preference -> Settings - More -> Syntax Specific - User
     {
         "auto_wrap" : true
     }
+
+###You can change `wrap_width` by
+
+    {
+        "wrap_width" : 100
+    }
+
 
 ###Wraping style
 Long word will stay at the ruler and only the next word breaks into a new line.<br>
