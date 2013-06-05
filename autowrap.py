@@ -2,6 +2,18 @@ import sublime, sublime_plugin, re, sys
 if sys.version >= '3':
     long  = int
 
+def get_wrap_width(view):
+    wrap_width = view.settings().get('auto_wrap_width')
+    if not wrap_width or wrap_width == 0:
+        wrap_width = view.settings().get('wrap_width')
+        if not wrap_width or wrap_width == 0:
+            rulers = view.settings().get('rulers')
+            if rulers:
+                wrap_width = rulers[0]
+            else:
+                wrap_width = 80
+    return wrap_width
+
 class AutoWrapListener(sublime_plugin.EventListener):
     saved_sel = 0
 
@@ -10,39 +22,33 @@ class AutoWrapListener(sublime_plugin.EventListener):
         if not view.settings().get('auto_wrap', False): return
         sel = view.sel()
         if not sel or len(sel)>1 or sel[0].begin()!=sel[0].end(): return
-        wrap_width = view.settings().get('wrap_width')
-        if not wrap_width or wrap_width == 0:
-            rulers = view.settings().get('rulers')
-            if rulers:
-                wrap_width = rulers[0]
-            else:
-                wrap_width = 80
-        wrap_width -= 2
+        wrap_width = get_wrap_width(view)
         pt = sel[0].end()
-        if pt<=self.saved_sel or pt-self.saved_sel>1 or view.rowcol(pt)[1]<=wrap_width \
-            or view.substr(pt-1)==" ":
-            activate = False
-        else: activate = True
-        self.saved_sel = sel[0].end()
-        if not activate: return
+        if pt<=self.saved_sel or pt-self.saved_sel>1 or view.rowcol(pt)[1]<wrap_width:
+            self.saved_sel = sel[0].end()
+            return
+        else:
+            self.saved_sel = sel[0].end()
 
         # to obtain the insert point
         line = view.substr(view.line(pt))
-        m = re.match('.*\s(\S*\s*)$',line)
+        m = re.match('.*\s(\S*\s?)$',line)
         if not m: return
         insertpt = view.line(pt).end()-len(m.group(1))
         if pt<insertpt: return
-        if view.settings().get("wrap_style") != "classic" and view.rowcol(insertpt)[1]<=wrap_width:
+        if not view.settings().get('auto_wrap_break_long_word',True) and view.rowcol(insertpt)[1]<=wrap_width:
             return
 
-        # insert enter
         view.run_command('auto_wrap_insert', {'insertpt': insertpt})
-        if view.settings().get('auto_indent'):
-            view.run_command('reindent', {'force_indent': False})
 
 class AutoWrapInsertCommand(sublime_plugin.TextCommand):
     def run(self, edit, insertpt):
-        self.view.insert(edit, long(insertpt), "\n")
+        view = self.view
+        # wrap_width = get_wrap_width(view)
+        view.insert(edit, long(insertpt), "\n")
+        view.replace(edit, sublime.Region(insertpt-1,insertpt), "")
+        if view.settings().get('auto_indent'):
+            view.run_command('reindent', {'force_indent': False})
 
 class ToggleAutoWrap(sublime_plugin.WindowCommand):
     def run(self):
