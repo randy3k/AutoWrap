@@ -6,7 +6,7 @@ Wrap width is detected in the following order
 
 1. `auto_wrap_width`
 2. `wrap_width`
-3. `ruler`
+3. `rulers`
 4. default 80
 
 Installation
@@ -29,14 +29,14 @@ Menu -> Preference -> Settings - More -> Syntax Specific - User
         "auto_wrap" : true
     }
 
-####You can change `auto_wrap_width` by
+####You can also change `auto_wrap_width` by
 
     {
         "auto_wrap_width" : 100
     }
 
 ####In default, long word will break into a new line.
-To change this behavior, consider
+To disable this behavior, consider
 
     {
         "auto_wrap_break_long_word" : false
