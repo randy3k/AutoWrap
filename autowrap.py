@@ -14,6 +14,7 @@ def get_wrap_width(view):
                 wrap_width = 80
     return wrap_width
 
+
 class AutoWrapListener(sublime_plugin.EventListener):
     saved_sel = 0
 
@@ -50,8 +51,7 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
             is_comment = True
         else:
             is_comment = False
-        view.insert(edit, long(insertpt), "\n")
-        view.replace(edit, sublime.Region(insertpt-1,insertpt), "")
+        view.replace(edit, sublime.Region(insertpt-1,insertpt), "\n")
         if view.settings().get('auto_indent'):
             view.run_command('reindent', {'force_indent': False})
         if is_comment:

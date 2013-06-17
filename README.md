@@ -17,7 +17,7 @@ Installation
 Usage
 ------------
 ####To toggle Auto Wrap
-Type `Auto Wrap` in command palette.
+Type `Auto Wrap` in command palette or Go to menu `Edit -> Auto Wrap`.
 
 
 ####To activate Auto Wrap for a specific syntax at start up
