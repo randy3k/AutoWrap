@@ -1,0 +1,11 @@
+[
+   {
+        "id": "edit",
+        "children":
+        [
+            { "caption": "-", "id" : "auto_wrap"},
+            { "command": "toggle_setting", "args": {"setting": "auto_wrap"}, "caption": "Auto Wrap", "checkbox": true }
+         ]
+
+    }
+]
