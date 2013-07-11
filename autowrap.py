@@ -51,7 +51,7 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
             is_comment = True
         else:
             is_comment = False
-        view.replace(edit, sublime.Region(insertpt-1,insertpt), "\n")
+        view.replace(edit, sublime.Region(long(insertpt-1),long(insertpt)), "\n")
         if view.settings().get('auto_indent'):
             view.run_command('reindent', {'force_indent': False})
         if is_comment:
