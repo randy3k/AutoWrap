@@ -45,16 +45,10 @@ class AutoWrapListener(sublime_plugin.EventListener):
 class AutoWrapInsertCommand(sublime_plugin.TextCommand):
     def run(self, edit, insertpt):
         view = self.view
-        # wrap_width = get_wrap_width(view)
-        scopename = view.scope_name(view.sel()[0].begin()-1)
-        if any([scope.find("comment")>=0 for scope in scopename.split(" ")]):
-            is_comment = True
-        else:
-            is_comment = False
         view.replace(edit, sublime.Region(long(insertpt-1),long(insertpt)), "\n")
         if view.settings().get('auto_indent'):
             view.run_command('reindent', {'force_indent': False})
-        if is_comment:
+        if view.scope_name(view.sel()[0].begin()-1).find("comment")>=0:
             view.run_command('toggle_comment', { "block": False })
 
 
