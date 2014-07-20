@@ -45,17 +45,18 @@ class AutoWrapListener(sublime_plugin.EventListener):
 class AutoWrapInsertCommand(sublime_plugin.TextCommand):
     def run(self, edit, insertpt):
         view = self.view
-        iscomment = view.score_selector(long(insertpt-1), "comment")>0
+        insertpt = long(insertpt)
+        iscomment = view.score_selector(insertpt-1, "comment")>0
 
         if view.substr(sublime.Region(insertpt,insertpt+1)) is " ":
-            view.replace(edit, sublime.Region(long(insertpt),long(insertpt+1)), "\n")
+            view.replace(edit, sublime.Region(insertpt,insertpt+1), "\n")
         elif view.substr(sublime.Region(insertpt-1,insertpt)) is " ":
-            view.replace(edit, sublime.Region(long(insertpt-1),long(insertpt)), "\n")
+            view.replace(edit, sublime.Region(insertpt-1,insertpt), "\n")
         else:
-            view.insert(edit, long(insertpt), "\n")
+            view.insert(edit, insertpt, "\n")
 
         if iscomment:
-            if view.score_selector(long(insertpt-1), "comment.block")==0:
+            if view.score_selector(insertpt-1, "comment.block")==0:
                 view.run_command('toggle_comment', { "block": False })
 
         if view.settings().get('auto_indent'):
