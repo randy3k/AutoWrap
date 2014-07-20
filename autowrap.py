@@ -32,7 +32,6 @@ class AutoWrapListener(sublime_plugin.EventListener):
             self.saved_sel = sel[0].end()
 
         # to obtain the insert point
-        print("word: ", view.substr(view.word(pt)))
         insertpt = view.word(pt).begin()
         auto_wrap_word_extension = view.settings().get('auto_wrap_word_extension', '')
         if view.substr(sublime.Region(insertpt-1,insertpt)) in auto_wrap_word_extension:
