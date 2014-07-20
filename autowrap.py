@@ -25,18 +25,19 @@ class AutoWrapListener(sublime_plugin.EventListener):
         if not sel or len(sel)>1 or sel[0].begin()!=sel[0].end(): return
         wrap_width = get_wrap_width(view)
         pt = sel[0].end()
-        if pt<=self.saved_sel or pt-self.saved_sel>1 or view.rowcol(pt)[1]<wrap_width:
+        if pt<=self.saved_sel or pt-self.saved_sel>1 or view.rowcol(pt)[1]<=wrap_width:
             self.saved_sel = sel[0].end()
             return
         else:
             self.saved_sel = sel[0].end()
 
         # to obtain the insert point
-        line = view.substr(view.line(pt))
-        m = re.match('.*\s(\S*\s?)$',line)
-        if not m: return
-        insertpt = view.line(pt).end()-len(m.group(1))
-        if pt<insertpt: return
+        print("word: ", view.substr(view.word(pt)))
+        insertpt = view.word(pt).begin()
+        auto_wrap_word_extension = view.settings().get('auto_wrap_word_extension', '')
+        if view.substr(sublime.Region(insertpt-1,insertpt)) in auto_wrap_word_extension:
+            insertpt = insertpt-1
+
         if not view.settings().get('auto_wrap_break_long_word',True) and view.rowcol(insertpt)[1]<=wrap_width:
             return
 
@@ -45,9 +46,16 @@ class AutoWrapListener(sublime_plugin.EventListener):
 class AutoWrapInsertCommand(sublime_plugin.TextCommand):
     def run(self, edit, insertpt):
         view = self.view
-        view.replace(edit, sublime.Region(long(insertpt-1),long(insertpt)), "\n")
+        iscomment = view.score_selector(long(insertpt-1), "comment")>0
 
-        if view.score_selector(long(insertpt-1), "comment")>0:
+        if view.substr(sublime.Region(insertpt,insertpt+1)) is " ":
+            view.replace(edit, sublime.Region(long(insertpt),long(insertpt+1)), "\n")
+        elif view.substr(sublime.Region(insertpt-1,insertpt)) is " ":
+            view.replace(edit, sublime.Region(long(insertpt-1),long(insertpt)), "\n")
+        else:
+            view.insert(edit, long(insertpt), "\n")
+
+        if iscomment:
             if view.score_selector(long(insertpt-1), "comment.block")==0:
                 view.run_command('toggle_comment', { "block": False })
 

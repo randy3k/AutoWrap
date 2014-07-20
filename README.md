@@ -41,3 +41,11 @@ To disable this behavior, consider
     {
         "auto_wrap_break_long_word" : false
     }
+
+####Setting for LaTeX syntax
+Since a 'word' in LaTeX is usually in the form of `\foo` with a begining blackslash, it 
+will be usually to extend the definition of a woard by adding this in the syntax specific preference
+
+    {
+        "auto_wrap_word_extension" : '\\'
+    }
