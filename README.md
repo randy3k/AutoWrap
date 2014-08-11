@@ -41,3 +41,9 @@ To disable this behavior, consider
     {
         "auto_wrap_break_long_word" : false
     }
+
+### To avoid breaking when a punctuation mark is at the wrap width, you can change the follwing. Default setting is `",.?;:'\""`.
+
+    {
+        "auto_wrap_end_chars" : ",.?;:'\""
+    }

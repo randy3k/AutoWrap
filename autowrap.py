@@ -31,10 +31,14 @@ class AutoWrapListener(sublime_plugin.EventListener):
         else:
             self.saved_sel = sel[0].end()
 
+        if view.substr(sublime.Region(pt-1,pt)) in view.settings().get('auto_wrap_end_chars', ",.?;:'\""):
+            pt = pt -1
         # to obtain the insert point
         insertpt = view.word(pt).begin()
+
         # move cursor back one char for latex command
-        if view.score_selector(insertpt-1, "text.tex.latex")>0 and view.substr(sublime.Region(insertpt-1,insertpt)) is "\\":
+        if view.score_selector(insertpt-1, "text.tex.latex")>0 and \
+                re.match(r"[^\\]\\", view.substr(sublime.Region(insertpt-2,insertpt))):
             insertpt = insertpt-1
 
         if not view.settings().get('auto_wrap_break_long_word',True) and view.rowcol(insertpt)[1]<=wrap_width:
