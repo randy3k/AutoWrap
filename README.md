@@ -46,7 +46,7 @@ To disable this behavior, consider
 
 #### Punctuations
 
-To avoid breaking when a punctuation mark is at the wrap width, you can change the follwing. Default setting is `",.?;:'\""`.
+To avoid a punctuation mark at the wrap width to break alone, the following setting was used. You can change default setting below by adding more punctuation.
 
     {
         "auto_wrap_end_chars" : ",.?;:'\""
