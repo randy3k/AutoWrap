@@ -16,11 +16,11 @@ Installation
 
 Usage
 ------------
-####To toggle Auto Wrap
+#### To toggle Auto Wrap
 Type `Auto Wrap` in command palette or Go to menu `Edit -> Auto Wrap`.
 
 
-####To activate Auto Wrap for a specific syntax at start up
+#### To activate Auto Wrap for a specific syntax at start up
 
 Put the following in your syntax specific preference.<br>
 Menu -> Preference -> Settings - More -> Syntax Specific - User
@@ -29,20 +29,24 @@ Menu -> Preference -> Settings - More -> Syntax Specific - User
         "auto_wrap" : true
     }
 
-####You can also change `auto_wrap_width` by
+#### You can also change `auto_wrap_width` by
 
     {
         "auto_wrap_width" : 100
     }
 
-####In default, long word will break into a new line.
+####
+
+In default, long word will break into a new line.
 To disable this behavior, consider
 
     {
         "auto_wrap_break_long_word" : false
     }
 
-### To avoid breaking when a punctuation mark is at the wrap width, you can change the follwing. Default setting is `",.?;:'\""`.
+#### Punctuations
+
+To avoid breaking when a punctuation mark is at the wrap width, you can change the follwing. Default setting is `",.?;:'\""`.
 
     {
         "auto_wrap_end_chars" : ",.?;:'\""
