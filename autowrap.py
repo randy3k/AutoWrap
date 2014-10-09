@@ -31,7 +31,8 @@ class AutoWrapListener(sublime_plugin.EventListener):
         else:
             self.saved_sel = sel[0].end()
 
-        if view.substr(sublime.Region(pt-1,pt)) in view.settings().get('auto_wrap_end_chars', ",.?;:'\""):
+        if view.substr(sublime.Region(pt-1,pt)) in \
+                 view.settings().get('auto_wrap_end_chars', ",.?;:'\""):
             pt = pt -1
         # to obtain the insert point
         insertpt = view.word(pt).begin()
@@ -41,7 +42,8 @@ class AutoWrapListener(sublime_plugin.EventListener):
                 re.match(r"[^\\]\\", view.substr(sublime.Region(insertpt-2,insertpt))):
             insertpt = insertpt-1
 
-        if not view.settings().get('auto_wrap_break_long_word',True) and view.rowcol(insertpt)[1]<=wrap_width:
+        if not view.settings().get('auto_wrap_break_long_word',True) and \
+                    view.rowcol(insertpt)[1]<=wrap_width:
             return
 
         view.run_command('auto_wrap_insert', {'insertpt': insertpt})
@@ -50,7 +52,8 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
     def run(self, edit, insertpt):
         view = self.view
         insertpt = long(insertpt)
-        iscomment = view.score_selector(insertpt-1, "comment")>0
+        iscomment = view.score_selector(insertpt-1, "comment")>0 and \
+                    view.score_selector(insertpt-1, "comment.block")==0
 
         if view.substr(sublime.Region(insertpt,insertpt+1)) is " ":
             view.replace(edit, sublime.Region(insertpt,insertpt+1), "\n")
@@ -63,11 +66,7 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
             view.run_command('reindent', {'force_indent': False})
 
         if iscomment:
-            if view.score_selector(insertpt-1, "comment.block")==0:
-                view.run_command('toggle_comment', { "block": False })
-
-
-
+            view.run_command('toggle_comment', { "block": False })
 
 class ToggleAutoWrap(sublime_plugin.WindowCommand):
     def run(self):
