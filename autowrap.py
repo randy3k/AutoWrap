@@ -59,12 +59,14 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
         else:
             view.insert(edit, insertpt, "\n")
 
+        if view.settings().get('auto_indent'):
+            view.run_command('reindent', {'force_indent': False})
+
         if iscomment:
             if view.score_selector(insertpt-1, "comment.block")==0:
                 view.run_command('toggle_comment', { "block": False })
 
-        if view.settings().get('auto_indent'):
-            view.run_command('reindent', {'force_indent': False})
+
 
 
 class ToggleAutoWrap(sublime_plugin.WindowCommand):
