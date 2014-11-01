@@ -48,10 +48,13 @@ To disable this behavior, consider
         "auto_wrap_break_long_word" : false
     }
 
-#### Punctuations
+#### Break characters
 
-To avoid a punctuation mark at the wrap width to break alone, the following setting was used. You can change default setting below by adding more punctuation.
+It is an regular expression to define a set of characters for which a break would occur before them. (Backslash has to be double escaped.)
 
     {
-        "auto_wrap_end_chars" : ",.?;:'\""
+        # it is the default
+        "auto_wrap_break_chars" :  "[ ({\\[\\n]"
+        # for latex, the following default is used
+        # "auto_wrap_break_chars" : "\\\\left\\\\.|\\\\left.|\\\\\\{|[ ({\\[\\n]"
     }
