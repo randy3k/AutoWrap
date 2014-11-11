@@ -1,6 +1,6 @@
 Auto (Hard) Wrap for Sublime Text 2/3
 ====================
-Automatic hard wrap when the cursor is beyond wrap width (default 80).  It is very useful for text documents.
+Automatic hard wrap beyond wrap width (default 80).  It is very useful for text documents.
 
 ![](https://raw.githubusercontent.com/randy3k/AutoWrap/master/screenshot.gif)
 
@@ -46,6 +46,14 @@ To disable this behavior, consider
 
     {
         "auto_wrap_break_long_word" : false
+    }
+
+#### Break beyond wrap width only
+
+If true, long sentence will break only if the cursor is beyond wrap width.
+
+    {
+        "auto_wrap_beyond_only" : true
     }
 
 #### Break characters

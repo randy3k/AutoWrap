@@ -36,6 +36,11 @@ class AutoWrapListener(sublime_plugin.EventListener):
             self.saved_sel = sel[0].end()
 
         wrap_width = get_wrap_width(view)
+
+        if view.settings().get('auto_wrap_beyond_only', False):
+            if view.rowcol(pt)[1] < wrap_width:
+                return
+
         line_begin = view.line(pt).begin()
         line_end = view.line(pt).end()
         insertpt = nextbrk_end = line_begin
