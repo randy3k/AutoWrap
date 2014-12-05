@@ -46,7 +46,7 @@ class AutoWrapListener(sublime_plugin.EventListener):
         insertpt = nextbrk_end = line_begin
 
         if  view.score_selector(pt, "text.tex.latex"):
-            default = r"\\left\\.|\\left.|\\\{|[ ({\[\n]"
+            default = r"\\left\\.|\\left.|\\\{|[ (\[\n]"
         else:
             default = r"[ ({\[\n]"
 
