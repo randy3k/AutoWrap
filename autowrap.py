@@ -1,7 +1,5 @@
 import sublime
 import sublime_plugin
-import re
-import sys
 
 
 def get_wrap_width(view):
