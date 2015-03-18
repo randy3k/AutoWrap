@@ -1,6 +1,6 @@
 Auto (Hard) Wrap for Sublime Text 2/3
 ====================
-Automatic hard wrap beyond wrap width (default 80).  It is very useful for text documents.
+Automatic hard wrap beyond wrap width.  It could be useful for text documents. [Sublime-Wrap-Plus](https://github.com/ehuss/Sublime-Wrap-Plus) could be used together with AutoWrap for the best experience.
 
 ![](https://raw.githubusercontent.com/randy3k/AutoWrap/master/screenshot.gif)
 
