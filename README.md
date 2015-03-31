@@ -1,5 +1,7 @@
 Auto (Hard) Wrap for Sublime Text 2/3
 ====================
+[![Build Status](https://travis-ci.org/randy3k/AutoWrap.svg?branch=master)](https://travis-ci.org/randy3k/AutoWrap)
+
 Automatic hard wrap beyond wrap width.  It could be useful for text documents. [Sublime-Wrap-Plus](https://github.com/ehuss/Sublime-Wrap-Plus) could be used together with AutoWrap for the best experience.
 
 ![](https://raw.githubusercontent.com/randy3k/AutoWrap/master/screenshot.gif)
