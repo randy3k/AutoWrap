@@ -86,6 +86,8 @@ class AutoWrapListener(sublime_plugin.EventListener):
                 return
             insertpt = view.line(pt).begin() + indices[index-1]
         else:
+            if index == len(indices)-1:
+                return
             insertpt = view.line(pt).begin() + indices[index]
 
         # protect from the listener
