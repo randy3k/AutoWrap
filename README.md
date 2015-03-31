@@ -60,7 +60,7 @@ If true, long sentence will break only if the cursor is beyond wrap width.
 
 #### Break characters
 
-It is an regular expression to define a set of characters for which a break would occur before them. (Backslash has to be double escaped.)
+It is an regular expression of a set of characters. Upon typing, AutoWrap searches for a match and a line would break at (right before) a matched location. Note that Backslash has to be double escaped.
 
     {
         # it is the default
