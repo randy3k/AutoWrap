@@ -1,5 +1,6 @@
 import sublime
 import sublime_plugin
+import re
 
 
 def get_wrap_width(view):
@@ -16,39 +17,59 @@ def get_wrap_width(view):
 
 
 class AutoWrapListener(sublime_plugin.EventListener):
-    saved_sel = 0
-    _continue = 0
-    last_view = None
+    cursor = 0
+    status = 0
+
+    @staticmethod
+    def reset_status():
+        AutoWrapListener.status = 0
+
+    @staticmethod
+    def add_status():
+        AutoWrapListener.status = AutoWrapListener.status + 1
+
+    @staticmethod
+    def is_joining():
+        return AutoWrapListener.status >= 2
+
+    def check_selection(self, view):
+        sel = view.sel()
+        if len(sel) == 0 or len(sel) > 1 or not sel[0].empty():
+            self.reset_status()
+            return False
+
+        pt = sel[0].end()
+
+        if view.rowcol(pt)[0] != view.rowcol(self.cursor)[0]:
+            self.reset_status()
+
+        if pt <= self.cursor or pt-self.cursor > 1:
+            self.cursor = sel[0].end()
+            return False
+        else:
+            self.cursor = sel[0].end()
+            return True
 
     def on_modified(self, view):
-        if view.is_scratch() or view.settings().get('is_widget'):
+        if view.settings().get('is_widget'):
             return
         if not view.settings().get('auto_wrap', False):
             return
-        if self.last_view != view:
-            self.last_view = view
-            return
-        sel = view.sel()
-        if len(sel) == 0 or len(sel) > 1 or sel[0].begin() != sel[0].end():
-            return
-        pt = sel[0].end()
-        if pt <= self.saved_sel or pt-self.saved_sel > 1:
-            if pt < self.saved_sel or pt-self.saved_sel > 1:
-                AutoWrapListener._continue = 0
-            self.saved_sel = sel[0].end()
-            return
-        else:
-            self.saved_sel = sel[0].end()
 
+        if not self.check_selection(view):
+            return
+
+        sel = view.sel()
+        pt = sel[0].end()
+        content = view.substr(view.line(pt))
         wrap_width = get_wrap_width(view)
+
+        if len(content) <= wrap_width:
+            return
 
         if view.settings().get('auto_wrap_beyond_only', False):
             if view.rowcol(pt)[1] < wrap_width:
                 return
-
-        line_begin = view.line(pt).begin()
-        line_end = view.line(pt).end()
-        insertpt = nextbrk_end = line_begin
 
         if view.score_selector(pt, "text.tex.latex"):
             default = r"\\left\\.|\\left.|\\\{|[ (\[\n]"
@@ -56,50 +77,30 @@ class AutoWrapListener(sublime_plugin.EventListener):
             default = r"[ ({\[\n]"
 
         break_chars = view.settings().get('auto_wrap_break_chars', default)
-        blongw = view.settings().get("auto_wrap_break_long_word", True)
-        n = 0
-        while True:
-            # prevent dead loop
-            if n == 100:
-                # print("max")
+        results = re.finditer(break_chars, content)
+        indices = [m.start(0) for m in results] + [len(content)]
+
+        index = next(x[0] for x in enumerate(indices) if x[1] > wrap_width)
+
+        if view.settings().get("auto_wrap_break_long_word", True):
+            if index == 0:
                 return
-            nextbrk = view.find(break_chars, nextbrk_end)
-
-            if view.rowcol(insertpt)[0] > view.rowcol(line_begin)[0]:
-                # print("insertpt in next line")
-                return
-
-            nextbrk_begin = nextbrk.begin()
-            nextbrk_end = nextbrk.end()
-
-            if nextbrk_begin == -1:
-                nextbrk_begin = line_end
-                nextbrk_end = line_end
-                if view.rowcol(nextbrk_begin)[1] <= wrap_width:
-                    # print("eof")
-                    return
-
-            # print(view.rowcol(insertpt)[1],view.substr(insertpt), view.rowcol(nextbrk_begin)[1])
-
-            if view.rowcol(nextbrk_begin)[0] > view.rowcol(line_begin)[0]:
-                # print("nextbrk_begin in next line")
-                return
-
-            if blongw and view.rowcol(insertpt)[1] <= wrap_width and \
-                    view.rowcol(nextbrk_begin)[1] > wrap_width:
-                break
-            elif not blongw and view.rowcol(insertpt)[1] >= wrap_width:
-                break
-            else:
-                insertpt = nextbrk_begin
-                # and search continue
-            n = n + 1
+            insertpt = view.line(pt).begin() + indices[index-1]
+        else:
+            insertpt = view.line(pt).begin() + indices[index]
 
         # protect from the listener
         view.settings().set('auto_wrap', False)
         view.run_command('auto_wrap_insert', {'insertpt': insertpt})
         # release from the listener
         view.settings().set('auto_wrap', True)
+
+    def on_deactivated(self, view):
+        if view.settings().get('is_widget'):
+            return
+        if not view.settings().get('auto_wrap', False):
+            return
+        self.reset_status()
 
 
 class AutoWrapInsertCommand(sublime_plugin.TextCommand):
@@ -117,10 +118,10 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
             view.replace(edit, sublime.Region(insertpt-1, insertpt), "\n")
         else:
             view.insert(edit, insertpt, "\n")
-        view.add_regions("auto_wrap_oldsel", view.sel())
+        view.add_regions("auto_wrap_oldsel", [s for s in view.sel()], "")
 
-        AutoWrapListener._continue = AutoWrapListener._continue + 1
-        if AutoWrapListener._continue >= 2:
+        AutoWrapListener.add_status()
+        if AutoWrapListener.is_joining():
             if iscomment:
                 view.sel().clear()
                 view.sel().add(view.text_point(insertpt_row+2, 0))
@@ -129,7 +130,7 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
         view.sel().clear()
         view.sel().add(sublime.Region(insertpt+1, insertpt+1))
 
-        if AutoWrapListener._continue >= 2:
+        if AutoWrapListener.is_joining():
             view.run_command('join_lines')
 
         if view.settings().get('auto_indent'):
@@ -139,7 +140,8 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
             view.run_command('toggle_comment', {"block": False})
 
         view.sel().clear()
-        view.sel().add_all(view.get_regions("auto_wrap_oldsel"))
+        for s in view.get_regions("auto_wrap_oldsel"):
+            view.sel().add(s)
         view.erase_regions("auto_wrap_oldsel")
 
 
