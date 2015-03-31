@@ -58,13 +58,11 @@ If true, long sentence will break only if the cursor is beyond wrap width.
         "auto_wrap_beyond_only" : true
     }
 
-#### Break characters
+#### Break patterns
 
-It is an regular expression of a set of characters. Upon typing, AutoWrap searches for a match and a line would break at (right before) a matched location. Note that Backslash has to be double escaped.
+Upon typing, AutoWrap searches for these characters (in regex, to be concatenate by `|`) and a line would break at (right before) a matched location. Note that Backslash has to be double escaped.
 
     {
         # it is the default
-        "auto_wrap_break_chars" :  "[ ({\\[\\n]"
-        # for latex, the following default is used
-        # "auto_wrap_break_chars" : "\\\\left\\\\.|\\\\left.|\\\\\\{|[ ({\\[\\n]"
+        "auto_wrap_break_patterns" :  ["\\[", "\\(", "\\{", " ", "\\n"]
     }

@@ -71,12 +71,11 @@ class AutoWrapListener(sublime_plugin.EventListener):
             if view.rowcol(pt)[1] < wrap_width:
                 return
 
+        default = [r"\[", r"\(", r"\{", " ", r"\n"]
         if view.score_selector(pt, "text.tex.latex"):
-            default = r"\\left\\.|\\left.|\\\{|[ (\[\n]"
-        else:
-            default = r"[ ({\[\n]"
+            default = [r"\\left\\.", r"\\left.", r"\\\{"] + default
 
-        break_chars = view.settings().get('auto_wrap_break_chars', default)
+        break_chars = "|".join(view.settings().get('auto_wrap_break_patterns', default))
         results = re.finditer(break_chars, content)
         indices = [m.start(0) for m in results] + [len(content)]
 
