@@ -1,7 +1,11 @@
 import sublime
-from UnitTesting.unittesting import DeferrableTestCase
 
 version = sublime.version()
+
+if version >= "3000":
+    from UnitTesting.unittesting import DeferrableTestCase
+else:
+    from unittesting import DeferrableTestCase
 
 Lorem = """Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do \\alpha
 tempor incididunt ut labore et dolore magna aliqua. Ut enim ad \\left[\\right]
