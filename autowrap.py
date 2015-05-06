@@ -17,20 +17,17 @@ def get_wrap_width(view):
 
 
 class AutoWrapListener(sublime_plugin.EventListener):
-    cursor = 0
+    cursor = (0, 0)
     status = 0
 
-    @staticmethod
-    def reset_status():
-        AutoWrapListener.status = 0
+    def reset_status(self):
+        self.status = 0
 
-    @staticmethod
-    def add_status():
-        AutoWrapListener.status = AutoWrapListener.status + 1
+    def set_status(self):
+        self.status = self.status + 1
 
-    @staticmethod
-    def is_joining():
-        return AutoWrapListener.status >= 2
+    def join(self, view):
+        return self.status >= 2 and view.rowcol(view.sel()[0].end())[1] <= get_wrap_width(view)
 
     def check_selection(self, view):
         sel = view.sel()
@@ -39,15 +36,15 @@ class AutoWrapListener(sublime_plugin.EventListener):
             return False
 
         pt = sel[0].end()
-
-        if view.rowcol(pt)[0] != view.rowcol(self.cursor)[0]:
+        rc = view.rowcol(pt)
+        if rc[0] != self.cursor[0]:
             self.reset_status()
 
-        if pt <= self.cursor or pt-self.cursor > 1:
-            self.cursor = sel[0].end()
+        if rc[0] != self.cursor[0] or rc[1] <= self.cursor[1] or rc[1] > self.cursor[1]+1:
+            self.cursor = view.rowcol(sel[0].end())
             return False
         else:
-            self.cursor = sel[0].end()
+            self.cursor = view.rowcol(sel[0].end())
             return True
 
     def on_modified(self, view):
@@ -88,9 +85,11 @@ class AutoWrapListener(sublime_plugin.EventListener):
                 return
             insertpt = view.line(pt).begin() + indices[index]
 
+        self.set_status()
+        join = self.join(view)
         # protect from the listener
         view.settings().set('auto_wrap', False)
-        view.run_command('auto_wrap_insert', {'insertpt': insertpt})
+        view.run_command('auto_wrap_insert', {'insertpt': insertpt, 'join': join})
         # release from the listener
         view.settings().set('auto_wrap', True)
 
@@ -103,7 +102,7 @@ class AutoWrapListener(sublime_plugin.EventListener):
 
 
 class AutoWrapInsertCommand(sublime_plugin.TextCommand):
-    def run(self, edit, insertpt):
+    def run(self, edit, insertpt, join=False):
         view = self.view
 
         insertpt = int(insertpt)
@@ -119,8 +118,7 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
             view.insert(edit, insertpt, "\n")
         view.add_regions("auto_wrap_oldsel", [s for s in view.sel()], "")
 
-        AutoWrapListener.add_status()
-        if AutoWrapListener.is_joining():
+        if join:
             if iscomment:
                 view.sel().clear()
                 view.sel().add(view.text_point(insertpt_row+2, 0))
@@ -129,7 +127,7 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
         view.sel().clear()
         view.sel().add(sublime.Region(insertpt+1, insertpt+1))
 
-        if AutoWrapListener.is_joining():
+        if join:
             view.run_command('join_lines')
 
         if view.settings().get('auto_indent'):
