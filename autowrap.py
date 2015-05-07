@@ -27,7 +27,7 @@ class AutoWrapListener(sublime_plugin.EventListener):
         self.status = self.status + 1
 
     def join(self, view):
-        return self.status >= 2 and view.rowcol(view.sel()[0].end())[1] <= get_wrap_width(view)
+        return self.status >= 2
 
     def check_selection(self, view):
         sel = view.sel()
@@ -47,26 +47,18 @@ class AutoWrapListener(sublime_plugin.EventListener):
             self.cursor = view.rowcol(sel[0].end())
             return True
 
-    def on_modified(self, view):
-        if view.settings().get('is_widget'):
-            return
-        if not view.settings().get('auto_wrap', False):
-            return
-
-        if not self.check_selection(view):
-            return
-
+    def get_insert_pt(self, view):
         sel = view.sel()
         pt = sel[0].end()
         content = view.substr(view.line(pt))
         wrap_width = get_wrap_width(view)
 
         if len(content) <= wrap_width:
-            return
+            return None
 
         if view.settings().get('auto_wrap_beyond_only', False):
             if view.rowcol(pt)[1] < wrap_width:
-                return
+                return None
 
         default = [r"\[", r"\(", r"\{", " ", r"\n"]
         if view.score_selector(pt, "text.tex.latex"):
@@ -79,11 +71,24 @@ class AutoWrapListener(sublime_plugin.EventListener):
         index = next(x[0] for x in enumerate(indices) if x[1] > wrap_width)
 
         if view.settings().get("auto_wrap_break_long_word", True) and index > 0:
-            insertpt = view.line(pt).begin() + indices[index-1]
+            return view.line(pt).begin() + indices[index-1]
         else:
             if index == len(indices)-1:
-                return
-            insertpt = view.line(pt).begin() + indices[index]
+                return None
+            return view.line(pt).begin() + indices[index]
+
+    def on_modified(self, view):
+        if view.settings().get('is_widget'):
+            return
+        if not view.settings().get('auto_wrap', False):
+            return
+
+        if not self.check_selection(view):
+            return
+
+        insertpt = self.get_insert_pt(view)
+        if not insertpt:
+            return
 
         self.set_status()
         join = self.join(view)
@@ -110,12 +115,23 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
         iscomment = view.score_selector(insertpt-1, "comment") > 0 and \
             view.score_selector(insertpt-1, "comment.block") == 0
 
-        if view.substr(sublime.Region(insertpt, insertpt+1)) is " ":
+        oldsel = view.sel()[0].end()
+        if view.substr(sublime.Region(insertpt, insertpt+1)) == " ":
             view.replace(edit, sublime.Region(insertpt, insertpt+1), "\n")
-        elif view.substr(sublime.Region(insertpt-1, insertpt)) is " ":
+            if sublime.version() < '3000' and insertpt == oldsel:
+                view.sel().clear()
+                view.sel().add(sublime.Region(oldsel, oldsel))
+        elif view.substr(sublime.Region(insertpt-1, insertpt)) == " ":
             view.replace(edit, sublime.Region(insertpt-1, insertpt), "\n")
+            if sublime.version() < '3000' and insertpt == oldsel:
+                view.sel().clear()
+                view.sel().add(sublime.Region(oldsel, oldsel))
         else:
             view.insert(edit, insertpt, "\n")
+            if insertpt == oldsel:
+                view.sel().clear()
+                view.sel().add(sublime.Region(oldsel, oldsel))
+
         view.add_regions("auto_wrap_oldsel", [s for s in view.sel()], "")
 
         if join:
@@ -128,7 +144,10 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
         view.sel().add(sublime.Region(insertpt+1, insertpt+1))
 
         if join:
+            oldsel = [s for s in view.get_regions("auto_wrap_oldsel")]
             view.run_command('join_lines')
+            view.erase_regions("auto_wrap_oldsel")
+            view.add_regions("auto_wrap_oldsel", oldsel, "")
 
         if view.settings().get('auto_indent'):
             view.run_command('reindent', {'force_indent': False})
