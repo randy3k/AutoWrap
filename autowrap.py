@@ -98,6 +98,15 @@ class AutoWrapListener(sublime_plugin.EventListener):
         # release from the listener
         view.settings().set('auto_wrap', True)
 
+    def on_post_text_command(self, view, command_name, args):
+        if view.settings().get('is_widget'):
+            return
+        if not view.settings().get('auto_wrap', False):
+            return
+
+        if command_name == 'undo':
+            self.reset_status()
+
     def on_deactivated(self, view):
         if view.settings().get('is_widget'):
             return
