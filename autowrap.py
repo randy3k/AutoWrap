@@ -104,7 +104,7 @@ class AutoWrapListener(sublime_plugin.EventListener):
         if not view.settings().get('auto_wrap', False):
             return
 
-        if command_name == 'undo':
+        if command_name in ['undo', 'soft_undo']:
             self.reset_status()
 
     def on_deactivated(self, view):
