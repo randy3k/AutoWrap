@@ -23,7 +23,7 @@ class TestBasic(DeferrableTestCase):
         self.view.settings().set("auto_wrap_width", 80)
 
     def tearDown(self):
-        if self.view:
+        if self.view and len(self.view.window().views()) > 1:
             self.view.set_scratch(True)
             self.view.window().focus_view(self.view)
             self.view.window().run_command("close_file")
