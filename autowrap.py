@@ -19,6 +19,7 @@ def get_wrap_width(view):
 class AutoWrapListener(sublime_plugin.EventListener):
     cursor = (0, 0)
     status = 0
+    left_delete = False
 
     def reset_status(self):
         self.status = 0
@@ -94,7 +95,11 @@ class AutoWrapListener(sublime_plugin.EventListener):
         join = self.join(view)
         # protect from the listener
         view.settings().set('auto_wrap', False)
-        view.run_command('auto_wrap_insert', {'insertpt': insertpt, 'join': join})
+        left_delete = " " not in view.substr(sublime.Region(insertpt-1, insertpt+1))
+        view.run_command('auto_wrap_insert', {
+            'insertpt': insertpt, 'join': join, "left_delete": self.left_delete
+        })
+        self.left_delete = left_delete
         # release from the listener
         view.settings().set('auto_wrap', True)
 
@@ -116,7 +121,7 @@ class AutoWrapListener(sublime_plugin.EventListener):
 
 
 class AutoWrapInsertCommand(sublime_plugin.TextCommand):
-    def run(self, edit, insertpt, join=False):
+    def run(self, edit, insertpt, join=False, left_delete=False):
         view = self.view
 
         insertpt = int(insertpt)
@@ -155,6 +160,8 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
         if join:
             oldsel = [s for s in view.get_regions("auto_wrap_oldsel")]
             view.run_command('join_lines')
+            if left_delete:
+                view.run_command("left_delete")
             view.erase_regions("auto_wrap_oldsel")
             view.add_regions("auto_wrap_oldsel", oldsel, "")
 

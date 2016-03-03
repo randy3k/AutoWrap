@@ -9,7 +9,7 @@ else:
 
 Lorem = """Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do \\alpha
 tempor incididunt ut labore et dolore magna aliqua. Ut enim ad \\left[\\right]
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea \\text{foo}
 consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
 cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
 proident, sunt in culpa qui officia deserunt mollit anim id est laborum."""
@@ -94,3 +94,14 @@ class TestLatex(DeferrableTestCase):
             yield 10
         second_row = self.getRow(1)
         self.assertEqual(second_row, "orange one two three")
+
+    def test_left_delete(self):
+        self.setText(Lorem)
+
+        self.view.sel().clear()
+        self.view.sel().add(sublime.Region(153, 153))
+        for c in " apple is orange apple is orange":
+            self.setText(c)
+            yield 10
+        second_row = self.getRow(3)
+        self.assertEqual(second_row, "ut aliquip ex ea \\text{foo}")
