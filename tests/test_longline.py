@@ -18,6 +18,9 @@ Lorem = ("""Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiu
 class TestLongline(DeferrableTestCase):
 
     def setUp(self):
+        # make sure we have a window to work with
+        s = sublime.load_settings("Preferences.sublime-settings")
+        s.set("close_windows_when_empty", False)
         self.view = sublime.active_window().new_file()
         self.view.settings().set("auto_wrap", True)
         self.view.settings().set("auto_wrap_width", 80)
