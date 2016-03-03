@@ -27,9 +27,6 @@ class AutoWrapListener(sublime_plugin.EventListener):
     def set_status(self):
         self.status = self.status + 1
 
-    def join(self, view):
-        return self.status >= 2
-
     def check_selection(self, view):
         sel = view.sel()
         if len(sel) == 0 or len(sel) > 1 or not sel[0].empty():
@@ -68,7 +65,6 @@ class AutoWrapListener(sublime_plugin.EventListener):
         break_chars = "|".join(view.settings().get('auto_wrap_break_patterns', default))
         results = re.finditer(break_chars, content)
         indices = [m.start(0) for m in results] + [len(content)]
-
         index = next(x[0] for x in enumerate(indices) if x[1] > wrap_width)
 
         if view.settings().get("auto_wrap_break_long_word", True) and index > 0:
@@ -92,10 +88,12 @@ class AutoWrapListener(sublime_plugin.EventListener):
             return
 
         self.set_status()
-        join = self.join(view)
+
+        join = self.status >= 2
+        left_delete = " " not in view.substr(sublime.Region(insertpt-1, insertpt+1))
+
         # protect from the listener
         view.settings().set('auto_wrap', False)
-        left_delete = " " not in view.substr(sublime.Region(insertpt-1, insertpt+1))
         view.run_command('auto_wrap_insert', {
             'insertpt': insertpt, 'join': join, "left_delete": self.left_delete
         })
@@ -129,41 +127,22 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
         iscomment = view.score_selector(insertpt-1, "comment") > 0 and \
             view.score_selector(insertpt-1, "comment.block") == 0
 
-        oldsel = view.sel()[0].end()
-        if view.substr(sublime.Region(insertpt, insertpt+1)) == " ":
-            view.replace(edit, sublime.Region(insertpt, insertpt+1), "\n")
-            if sublime.version() < '3000' and insertpt == oldsel:
-                view.sel().clear()
-                view.sel().add(sublime.Region(oldsel, oldsel))
-        elif view.substr(sublime.Region(insertpt-1, insertpt)) == " ":
-            view.replace(edit, sublime.Region(insertpt-1, insertpt), "\n")
-            if sublime.version() < '3000' and insertpt == oldsel:
-                view.sel().clear()
-                view.sel().add(sublime.Region(oldsel, oldsel))
-        else:
-            view.insert(edit, insertpt, "\n")
-            if insertpt == oldsel:
-                view.sel().clear()
-                view.sel().add(sublime.Region(oldsel, oldsel))
+        view.insert(edit, insertpt, "\n")
 
         view.add_regions("auto_wrap_oldsel", [s for s in view.sel()], "")
 
-        if join:
-            if iscomment:
-                view.sel().clear()
-                view.sel().add(view.text_point(insertpt_row+2, 0))
-                view.run_command('toggle_comment', {"block": False})
+        if join and iscomment:
+            view.sel().clear()
+            view.sel().add(view.text_point(insertpt_row+2, 0))
+            view.run_command('toggle_comment', {"block": False})
 
         view.sel().clear()
         view.sel().add(sublime.Region(insertpt+1, insertpt+1))
 
         if join:
-            oldsel = [s for s in view.get_regions("auto_wrap_oldsel")]
             view.run_command('join_lines')
             if left_delete:
                 view.run_command("left_delete")
-            view.erase_regions("auto_wrap_oldsel")
-            view.add_regions("auto_wrap_oldsel", oldsel, "")
 
         if view.settings().get('auto_indent'):
             view.run_command('reindent', {'force_indent': False})

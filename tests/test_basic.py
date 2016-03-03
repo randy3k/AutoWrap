@@ -96,3 +96,69 @@ class TestBasic(DeferrableTestCase):
             yield 10
         second_row = self.getRow(1)
         self.assertEqual(second_row, "is orange one two three")
+
+    def test_space_at_79(self):
+        self.setText(Lorem)
+
+        self.view.sel().clear()
+        self.view.sel().add(sublime.Region(72, 72))
+        for c in " orange is good":
+            self.setText(c)
+            yield 10
+        first_row = self.getRow(0)
+        self.assertEqual(first_row[-1], "e")
+        second_row = self.getRow(1)
+        self.assertEqual(second_row, "is good")
+
+    def test_space_at_80(self):
+        self.setText(Lorem)
+
+        self.view.sel().clear()
+        self.view.sel().add(sublime.Region(72, 72))
+        for c in " orangee is good":
+            self.setText(c)
+            yield 10
+        second_row = self.getRow(1)
+        self.assertEqual(second_row, "is good")
+
+    def test_paran(self):
+        self.setText(Lorem)
+        self.view.sel().clear()
+        self.view.sel().add(sublime.Region(72, 72))
+        self.setText(" fooooo(")
+
+        self.view.sel().clear()
+        self.view.sel().add(sublime.Region(80, 80))
+
+        for c in "apple":
+            self.setText(c)
+            yield 10
+
+        self.assertEqual(self.getRow(1), "(apple")
+
+    def test_paran2(self):
+        self.setText(Lorem)
+        self.view.sel().clear()
+        self.view.sel().add(sublime.Region(72, 72))
+        self.setText(" foooooo(")
+
+        self.view.sel().clear()
+        self.view.sel().add(sublime.Region(81, 81))
+
+        for c in "apple":
+            self.setText(c)
+            yield 10
+
+        self.assertEqual(self.getRow(1), "(apple")
+
+    def test_dont_break_long_ward(self):
+        self.view.settings().set("auto_wrap_break_long_word", False)
+        self.setText(Lorem)
+
+        self.view.sel().clear()
+        self.view.sel().add(sublime.Region(72, 72))
+        for c in " apple is orange one two three":
+            self.setText(c)
+            yield 10
+        second_row = self.getRow(1)
+        self.assertEqual(second_row, "orange one two three")
