@@ -141,7 +141,8 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
 
         if join:
             view.run_command('join_lines')
-            if left_delete:
+            pt = view.sel()[0].end()
+            if left_delete and view.substr(sublime.Region(pt-1, pt)) == " ":
                 view.run_command("left_delete")
 
         if view.settings().get('auto_indent'):
