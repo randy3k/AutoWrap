@@ -42,7 +42,7 @@ class TestC(DeferrableTestCase):
 
         self.view.sel().clear()
         self.view.sel().add(sublime.Region(67, 67))
-        for c in " foo foo foo ":
+        for c in " foo foo foo foo foo ":
             self.setText(c)
             yield 10
         second_row = self.getRow(2)
@@ -58,7 +58,7 @@ class TestC(DeferrableTestCase):
 
         self.view.sel().clear()
         self.view.sel().add(sublime.Region(71, 71))
-        for c in " foo foo foo ":
+        for c in " foo foo foo foo foo ":
             self.setText(c)
             yield 10
         second_row = self.getRow(2)

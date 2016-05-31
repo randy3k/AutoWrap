@@ -131,6 +131,8 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
             m = re.match("^\s*", content)
             indentation = m.group(0) if m else ""
 
+        insertpt_at_cursor = insertpt == view.sel()[0].end()
+
         view.insert(edit, insertpt, "\n")
 
         view.add_regions("auto_wrap_oldsel", [s for s in view.sel()], "")
@@ -152,8 +154,8 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
         if view.settings().get('auto_indent'):
             if is_comment_block:
                 pt = view.sel()[0].end()
-                view.replace(edit, view.find("\s*", pt), "")
-                view.replace(edit, view.find("^\s*", view.line(pt).begin()), indentation)
+                view.replace(edit, view.find("^\s*", view.line(pt).begin()), "")
+                view.insert(edit, view.line(pt).begin(), indentation)
             else:
                 view.run_command('reindent', {'force_indent': False})
 
@@ -161,8 +163,11 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
             view.run_command('toggle_comment', {"block": False})
 
         view.sel().clear()
-        for s in view.get_regions("auto_wrap_oldsel"):
-            view.sel().add(s)
+        if insertpt_at_cursor:
+            view.sel().add(sublime.Region(insertpt, insertpt))
+        else:
+            for s in view.get_regions("auto_wrap_oldsel"):
+                view.sel().add(s)
         view.erase_regions("auto_wrap_oldsel")
 
 

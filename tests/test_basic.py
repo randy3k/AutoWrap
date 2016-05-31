@@ -91,6 +91,17 @@ class TestBasic(DeferrableTestCase):
         second_row = self.getRow(1)
         self.assertEqual(second_row, "is orange one two three")
 
+    def test_insertpt_at_cursor(self):
+        self.setText(Lorem)
+
+        self.view.sel().clear()
+        self.view.sel().add(sublime.Region(64, 64))
+        for c in " apple foo bar":
+            self.setText(c)
+            yield 10
+        second_row = self.getRow(1)
+        self.assertEqual(second_row, "eiusmod")
+
     def test_space_at_79(self):
         self.setText(Lorem)
 
