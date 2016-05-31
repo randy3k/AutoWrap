@@ -63,12 +63,12 @@ class AutoWrapListener(sublime_plugin.EventListener):
             default = [r"\\left\\.", r"\\left.", r"\\\{"] + default
 
         break_chars = "|".join(view.settings().get('auto_wrap_break_patterns', default))
-        results = re.finditer(break_chars, content, re.VERBOSE)
+        results = re.finditer(break_chars, content)
         indices = [m.start(0) for m in results] + [len(content)]
         index = next(x[0] for x in enumerate(indices) if x[1] > wrap_width)
 
         if view.settings().get("auto_wrap_break_long_word", True) and index > 0:
-            return view.line(pt).begin() + indices[index-1]
+            return view.line(pt).begin() + indices[index-1] + 1
         else:
             if index == len(indices)-1:
                 return None
