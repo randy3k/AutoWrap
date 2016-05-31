@@ -124,14 +124,18 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
 
         insertpt = int(insertpt)
         insertpt_row = view.rowcol(insertpt)[0]
-        iscomment = view.score_selector(insertpt-1, "comment") > 0 and \
-            view.score_selector(insertpt-1, "comment.block") == 0
+        is_comment_block = view.score_selector(insertpt-1, "comment.block") > 0
+        is_comment_line = view.score_selector(insertpt-1, "comment") > 0 and not is_comment_block
+        if is_comment_block:
+            content = view.substr(view.line(insertpt))
+            m = re.match("^\s*", content)
+            indentation = m.group(0) if m else ""
 
         view.insert(edit, insertpt, "\n")
 
         view.add_regions("auto_wrap_oldsel", [s for s in view.sel()], "")
 
-        if join and iscomment:
+        if join and is_comment_line:
             view.sel().clear()
             view.sel().add(view.text_point(insertpt_row+2, 0))
             view.run_command('toggle_comment', {"block": False})
@@ -146,9 +150,14 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
                 view.run_command("left_delete")
 
         if view.settings().get('auto_indent'):
-            view.run_command('reindent', {'force_indent': False})
+            if is_comment_block:
+                pt = view.sel()[0].end()
+                view.replace(edit, view.find("\s*", pt), "")
+                view.replace(edit, view.find("^\s*", view.line(pt).begin()), indentation)
+            else:
+                view.run_command('reindent', {'force_indent': False})
 
-        if iscomment:
+        if is_comment_line:
             view.run_command('toggle_comment', {"block": False})
 
         view.sel().clear()
