@@ -9,21 +9,23 @@ env:
     matrix:
         - SUBLIME_TEXT_VERSION="2"
         - SUBLIME_TEXT_VERSION="3"
-        - SUBLIME_TEXT_VERSION="2" TAG="master"
-        - SUBLIME_TEXT_VERSION="3" TAG="master"
+        - SUBLIME_TEXT_VERSION="2" UNITTESTING_TAG="master"
+        - SUBLIME_TEXT_VERSION="3" UNITTESTING_TAG="master" PACKAGE_RELOADER_TAG="master"
 
 before_install:
     - curl -OL https://raw.githubusercontent.com/randy3k/UnitTesting/master/sbin/travis.sh
 
 install:
-    - if [ "$SUBLIME_TEXT_VERSION" == "3"  ]; then sudo pip install python-coveralls; fi
     - sh travis.sh bootstrap
 
 script:
     - sh travis.sh run_tests --coverage
 
 after_success:
-    - if [ "$SUBLIME_TEXT_VERSION" == "3" ]; then coveralls; fi
+    - if [ "$SUBLIME_TEXT_VERSION" == "3" ]; then
+            sudo pip install python-coveralls;
+            coveralls;
+      fi
 
 notifications:
     email: false
