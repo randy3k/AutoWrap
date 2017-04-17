@@ -147,6 +147,11 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
 
         if join:
             view.run_command('join_lines')
+            cursorpt = view.get_regions("auto_wrap_oldsel")[0].begin()
+            if cursorpt == view.sel()[0].begin():
+                # if a space is added at cursor when joining line
+                # move `auto_wrap_oldsel` backward
+                view.add_regions("auto_wrap_oldsel", [sublime.Region(cursorpt-1, cursorpt-1)], "")
             pt = view.sel()[0].end()
             if left_delete and view.substr(sublime.Region(pt-1, pt)) == " ":
                 view.run_command("left_delete")
@@ -168,6 +173,7 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
         else:
             for s in view.get_regions("auto_wrap_oldsel"):
                 view.sel().add(s)
+
         view.erase_regions("auto_wrap_oldsel")
 
 
