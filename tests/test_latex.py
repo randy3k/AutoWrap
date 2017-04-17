@@ -100,5 +100,16 @@ class TestLatex(DeferrableTestCase):
         for c in " apple is orange apple is orange":
             self.setText(c)
             yield 10
-        second_row = self.getRow(3)
-        self.assertEqual(second_row, "ut aliquip ex ea \\text{foo}")
+        row = self.getRow(3)
+        self.assertEqual(row, "ut aliquip ex ea \\text{foo}")
+
+    def test_latex_command_wrap(self):
+        self.setText(Lorem)
+
+        self.view.sel().clear()
+        self.view.sel().add(sublime.Region(219, 219))
+        for c in "barbarbar":
+            self.setText(c)
+            yield 10
+        row = self.getRow(3)
+        self.assertEqual(row, "\\text{barbarbarfoo}")

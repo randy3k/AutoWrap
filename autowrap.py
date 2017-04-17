@@ -60,7 +60,7 @@ class AutoWrapListener(sublime_plugin.EventListener):
 
         default = [r"\[", r"\(", r"\{", " ", r"\n"]
         if view.score_selector(pt, "text.tex.latex"):
-            default = [r"\\left\\.", r"\\left.", r"\\\{"] + default
+            default = [r"\\[a-z]*\*?\{"] + default
 
         break_chars = "|".join(view.settings().get('auto_wrap_break_patterns', default))
         results = re.finditer(break_chars, content)
