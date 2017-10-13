@@ -9,7 +9,6 @@ env:
     matrix:
         - SUBLIME_TEXT_VERSION="2"
         - SUBLIME_TEXT_VERSION="3"
-        - SUBLIME_TEXT_VERSION="2" UNITTESTING_TAG="master"
         - SUBLIME_TEXT_VERSION="3" UNITTESTING_TAG="master"
 
 before_install:
