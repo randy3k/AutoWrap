@@ -49,13 +49,15 @@ class AutoWrapListener(sublime_plugin.EventListener):
         sel = view.sel()
         pt = sel[0].end()
         content = view.substr(view.line(pt))
+        indent_size=view.settings().get('tab_size')
+        tabCount=content.count('\t')
         wrap_width = get_wrap_width(view)
 
-        if len(content) <= wrap_width:
+        if len(content)+tabCount*(indent_size-1) <= wrap_width:
             return None
 
         if view.settings().get('auto_wrap_beyond_only', False):
-            if view.rowcol(pt)[1] < wrap_width:
+            if view.rowcol(pt)[1]+tabCount*(indent_size-1) < wrap_width:
                 return None
 
         default = [r"\[", r"\(", r"\{", " ", r"\n"]
@@ -65,7 +67,7 @@ class AutoWrapListener(sublime_plugin.EventListener):
         break_chars = "|".join(view.settings().get('auto_wrap_break_patterns', default))
         results = re.finditer(break_chars, content)
         indices = [m.start(0) for m in results] + [len(content)]
-        index = next(x[0] for x in enumerate(indices) if x[1] > wrap_width)
+        index = next(x[0] for x in enumerate(indices) if x[1]+tabCount*(indent_size-1) > wrap_width)
 
         if view.settings().get("auto_wrap_break_long_word", True) and index > 0:
             return view.line(pt).begin() + indices[index-1]
