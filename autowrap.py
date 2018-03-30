@@ -38,7 +38,7 @@ class AutoWrapListener(sublime_plugin.EventListener):
         if rc[0] != self.cursor[0]:
             self.reset_status()
 
-        if rc[0] != self.cursor[0] or rc[1] <= self.cursor[1] or rc[1] > self.cursor[1]+1:
+        if rc[0] != self.cursor[0] or rc[1] <= self.cursor[1] or rc[1] > self.cursor[1] + 1:
             self.cursor = view.rowcol(sel[0].end())
             return False
         else:
@@ -49,15 +49,16 @@ class AutoWrapListener(sublime_plugin.EventListener):
         sel = view.sel()
         pt = sel[0].end()
         content = view.substr(view.line(pt))
-        indent_size=view.settings().get('tab_size')
-        tabCount=content.count('\t')
+        indent_size = view.settings().get('tab_size')
+        tab_count = content.count('\t')
         wrap_width = get_wrap_width(view)
 
-        if len(content)+tabCount*(indent_size-1) <= wrap_width:
+        extra_pading = tab_count * (indent_size - 1)
+        if len(content) + extra_pading <= wrap_width:
             return None
 
         if view.settings().get('auto_wrap_beyond_only', False):
-            if view.rowcol(pt)[1]+tabCount*(indent_size-1) < wrap_width:
+            if view.rowcol(pt)[1] + extra_pading < wrap_width:
                 return None
 
         default = [r"\[", r"\(", r"\{", " ", r"\n"]
@@ -67,12 +68,12 @@ class AutoWrapListener(sublime_plugin.EventListener):
         break_chars = "|".join(view.settings().get('auto_wrap_break_patterns', default))
         results = re.finditer(break_chars, content)
         indices = [m.start(0) for m in results] + [len(content)]
-        index = next(x[0] for x in enumerate(indices) if x[1]+tabCount*(indent_size-1) > wrap_width)
+        index = next(x[0] for x in enumerate(indices) if x[1] + extra_pading > wrap_width)
 
         if view.settings().get("auto_wrap_break_long_word", True) and index > 0:
-            return view.line(pt).begin() + indices[index-1]
+            return view.line(pt).begin() + indices[index - 1]
         else:
-            if index == len(indices)-1:
+            if index == len(indices) - 1:
                 return None
             return view.line(pt).begin() + indices[index]
 
@@ -92,7 +93,7 @@ class AutoWrapListener(sublime_plugin.EventListener):
         self.set_status()
 
         join = self.status >= 2
-        left_delete = " " not in view.substr(sublime.Region(insertpt-1, insertpt+1))
+        left_delete = " " not in view.substr(sublime.Region(insertpt - 1, insertpt + 1))
 
         # protect from the listener
         view.settings().set('auto_wrap', False)
@@ -126,11 +127,11 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
 
         insertpt = int(insertpt)
         insertpt_row = view.rowcol(insertpt)[0]
-        is_comment_block = view.score_selector(insertpt-1, "comment.block") > 0
-        is_comment_line = view.score_selector(insertpt-1, "comment") > 0 and not is_comment_block
+        is_comment_block = view.score_selector(insertpt - 1, "comment.block") > 0
+        is_comment_line = view.score_selector(insertpt - 1, "comment") > 0 and not is_comment_block
         if is_comment_block:
             content = view.substr(view.line(insertpt))
-            m = re.match("^\s*", content)
+            m = re.match(r"^\s*", content)
             indentation = m.group(0) if m else ""
 
         insertpt_at_cursor = insertpt == view.sel()[0].end()
@@ -141,11 +142,11 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
 
         if join and is_comment_line:
             view.sel().clear()
-            view.sel().add(view.text_point(insertpt_row+2, 0))
+            view.sel().add(view.text_point(insertpt_row + 2, 0))
             view.run_command('toggle_comment', {"block": False})
 
         view.sel().clear()
-        view.sel().add(sublime.Region(insertpt+1, insertpt+1))
+        view.sel().add(sublime.Region(insertpt + 1, insertpt + 1))
 
         if join:
             view.run_command('join_lines')
@@ -153,15 +154,15 @@ class AutoWrapInsertCommand(sublime_plugin.TextCommand):
             if cursorpt == view.sel()[0].begin():
                 # if a space is added at cursor when joining line
                 # move `auto_wrap_oldsel` backward
-                view.add_regions("auto_wrap_oldsel", [sublime.Region(cursorpt-1, cursorpt-1)], "")
+                view.add_regions("auto_wrap_oldsel", [sublime.Region(cursorpt - 1, cursorpt - 1)], "")
             pt = view.sel()[0].end()
-            if left_delete and view.substr(sublime.Region(pt-1, pt)) == " ":
+            if left_delete and view.substr(sublime.Region(pt - 1, pt)) == " ":
                 view.run_command("left_delete")
 
         if view.settings().get('auto_indent'):
             if is_comment_block:
                 pt = view.sel()[0].end()
-                view.replace(edit, view.find("^\s*", view.line(pt).begin()), "")
+                view.replace(edit, view.find(r"^\s*", view.line(pt).begin()), "")
                 view.insert(edit, view.line(pt).begin(), indentation)
             else:
                 view.run_command('reindent', {'force_indent': False})
