@@ -1,18 +1,16 @@
 os:
-    - linux
-    - osx
+  - linux
+  - osx
 
 env:
-    global:
-        # Your package name
-        - PACKAGE="AutoWrap"
-    matrix:
-        - SUBLIME_TEXT_VERSION="2"
-        - SUBLIME_TEXT_VERSION="3"
-        - SUBLIME_TEXT_VERSION="3" UNITTESTING_TAG="master"
+    - PACKAGE="AutoWrap" SUBLIME_TEXT_VERSION="3"
 
 before_install:
     - curl -OL https://raw.githubusercontent.com/randy3k/UnitTesting/master/sbin/travis.sh
+    - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
+            export DISPLAY=:99.0;
+            sh -e /etc/init.d/xvfb start;
+      fi
 
 install:
     - sh travis.sh bootstrap
@@ -21,10 +19,10 @@ script:
     - sh travis.sh run_tests --coverage
 
 after_success:
-    - if [ "$SUBLIME_TEXT_VERSION" == "3" ]; then
-            sudo pip install python-coveralls;
-            coveralls;
-      fi
+    - sudo pip install python-coveralls
+    - coveralls
 
 notifications:
-    email: false
+    email:
+        on_success: change
+        on_failure: change
