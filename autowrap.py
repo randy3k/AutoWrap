@@ -71,7 +71,10 @@ class AutoWrapListener(sublime_plugin.EventListener):
         index = next(x[0] for x in enumerate(indices) if x[1] + extra_pading > wrap_width)
 
         if view.settings().get("auto_wrap_break_long_word", True) and index > 0:
-            return view.line(pt).begin() + indices[index - 1]
+            if indices[index - 1] == 0:
+                return None
+            else:
+                return view.line(pt).begin() + indices[index - 1]
         else:
             if index == len(indices) - 1:
                 return None
